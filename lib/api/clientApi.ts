@@ -1,5 +1,4 @@
-// import axios from "axios";
-import { UserMe, UserRequest } from "@/types/user";
+import { User, AuthCredentials } from "@/types/user";
 import { nextServer } from "./api";
 import { CheckSession } from "@/types/response";
 import type {
@@ -8,14 +7,15 @@ import type {
   Note,
   Params,
 } from "@/types/note";
+import type { AxiosResponse } from "axios";
 
-export const registration = async (user: UserRequest): Promise<UserMe> => {
-  const { data } = await nextServer.post<UserMe>("/auth/register", user);
+export const registration = async (user: AuthCredentials): Promise<User> => {
+  const { data } = await nextServer.post<User>("/auth/register", user);
   return data;
 };
 
-export const login = async (user: UserRequest): Promise<UserMe> => {
-  const { data } = await nextServer.post<UserMe>("/auth/login", user);
+export const login = async (user: AuthCredentials): Promise<User> => {
+  const { data } = await nextServer.post<User>("/auth/login", user);
   return data;
 };
 
@@ -24,18 +24,24 @@ export const logout = async () => {
   return data.success;
 };
 
-export async function checkSessionClient() {
+// ✅ для клієнта: повертає лише success (boolean)
+export async function checkSessionClient(): Promise<boolean> {
   const { data } = await nextServer.get<CheckSession>("/auth/session");
   return data.success;
 }
 
+// ✅ для middleware: повертає весь об'єкт відповіді Axios
+export async function checkSessionServer(): Promise<AxiosResponse<CheckSession>> {
+  return await nextServer.get<CheckSession>("/auth/session");
+}
+
 export async function userInfoClient() {
-  const { data } = await nextServer.get<UserMe>("/users/me");
+  const { data } = await nextServer.get<User>("/users/me");
   return data;
 }
 
-export async function updateUser(user: Partial<UserMe>) {
-  const { data } = await nextServer.patch<UserMe>("/users/me", user);
+export async function updateUser(user: Partial<User>) {
+  const { data } = await nextServer.patch<User>("/users/me", user);
   return data;
 }
 

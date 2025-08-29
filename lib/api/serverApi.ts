@@ -1,5 +1,5 @@
 // lib/api/serverApi.ts
-import { UserMe } from "@/types/user";
+import { User } from "@/types/user";
 import { nextServer } from "./api";
 import type { FetchNotesResponse, Note, Params } from "../../types/note";
 import { cookies } from "next/headers";
@@ -35,7 +35,7 @@ export async function refreshSessionServer(refreshToken: string): Promise<Respon
 
 export async function userInfoServer() {
   const cookieStore = await cookies();
-  const { data } = await nextServer.get<UserMe>("/users/me", {
+  const { data } = await nextServer.get<User>("/users/me", {
     headers: {
       Cookie: cookieStore.toString(),
     },

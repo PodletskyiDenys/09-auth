@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { parse } from "cookie";
 import { refreshSessionServer } from "./lib/api/serverApi";
 
-const privateRoutes = ["/profile"];
+const privateRoutes = ["/profile", "/notes", "/notes/filter"];
 const publicRoutes = ["/sign-in", "/sign-up"];
 
 export async function middleware(request: NextRequest) {
@@ -12,8 +12,12 @@ export async function middleware(request: NextRequest) {
   const accessToken = request.cookies.get("accessToken")?.value;
   const refreshToken = request.cookies.get("refreshToken")?.value;
 
-  const isPublicRoute = publicRoutes.some((route) => pathname.startsWith(route));
-  const isPrivateRoute = privateRoutes.some((route) => pathname.startsWith(route));
+  const isPublicRoute = publicRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
+  const isPrivateRoute = privateRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
 
   // Якщо немає accessToken, але є refreshToken → пробуємо оновити сесію
   if (!accessToken && refreshToken) {
@@ -65,5 +69,11 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/profile/:path*", "/sign-in", "/sign-up"],
+  matcher: [
+    "/profile/:path*",
+    "/notes/:path*",
+    "/notes/filter/:path*",
+    "/sign-in",
+    "/sign-up",
+  ],
 };

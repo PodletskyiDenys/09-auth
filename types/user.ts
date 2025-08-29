@@ -1,10 +1,10 @@
-export type UserRequest = {
-  email: string;
-  password: string;
-};
-
-export interface UserMe {
+export interface User {
   username: string;
   email: string;
   avatar: string;
 }
+
+export type AuthCredentials = {
+  email: string;
+  password: string;
+};

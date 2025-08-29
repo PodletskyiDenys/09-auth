@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import css from './SignInPage.module.css';
-import { UserRequest } from '@/types/user';
+import { AuthCredentials } from "@/types/user";
 import { useRouter } from 'next/navigation';
 import { login } from '@/lib/api/clientApi';
 import { useAuthStore } from '@/lib/store/authStore';
@@ -12,7 +12,7 @@ export default function SignInPage() {
 
   const handleSubmit = async (formData: FormData) => {
     try {
-      const newUser = Object.fromEntries(formData) as UserRequest;
+      const newUser = Object.fromEntries(formData) as AuthCredentials;
       const user = await login(newUser);
       setUser(user);
       router.push('/profile');

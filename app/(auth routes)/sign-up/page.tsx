@@ -2,7 +2,8 @@
 import css from "@/app/(auth routes)/sign-up/SignUpPage.module.css"
 import { registration } from "@/lib/api/clientApi";
 import { useAuthStore } from "@/lib/store/authStore";
-import { UserRequest } from "@/types/user";
+import { AuthCredentials } from "@/types/user";
+
 import { ApiError} from "@/types/response";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -14,7 +15,7 @@ export default function SignUpPage() {
 
     const handleSubmit = async (formData: FormData) => {
         try {
-            const newUser = Object.fromEntries(formData) as UserRequest;
+            const newUser = Object.fromEntries(formData) as AuthCredentials;
             const user = await registration(newUser);
             if (user) {
                 setUser(user);

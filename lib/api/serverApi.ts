@@ -1,17 +1,14 @@
-// lib/api/serverApi.ts
 import { User } from "@/types/user";
 import { nextServer } from "./api";
 import type { FetchNotesResponse, Note, Params } from "../../types/note";
 import { cookies } from "next/headers";
 import type { CheckSession } from "@/types/response";
 
-// Простий чек чи є валідна сесія
+// Чек валідності сесії через cookie
 export async function checkSessionServer(): Promise<boolean> {
   const cookieStore = await cookies();
   const { data } = await nextServer.get<CheckSession>("/auth/session", {
-    headers: {
-      Cookie: cookieStore.toString(),
-    },
+    headers: { Cookie: cookieStore.toString() },
   });
   return data.success;
 }
@@ -21,9 +18,7 @@ export async function refreshSessionServer(refreshToken: string): Promise<Respon
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/session`, {
       method: "GET",
-      headers: {
-        Cookie: `refreshToken=${refreshToken}`,
-      },
+      headers: { Cookie: `refreshToken=${refreshToken}` },
       credentials: "include",
     });
     return res;
@@ -33,16 +28,16 @@ export async function refreshSessionServer(refreshToken: string): Promise<Respon
   }
 }
 
-export async function userInfoServer() {
+// Інформація про користувача через cookie
+export async function userInfoServer(): Promise<User> {
   const cookieStore = await cookies();
   const { data } = await nextServer.get<User>("/users/me", {
-    headers: {
-      Cookie: cookieStore.toString(),
-    },
+    headers: { Cookie: cookieStore.toString() },
   });
   return data;
 }
 
+// Робота з нотатками
 export async function fetchNotes(
   searchValue: string = "",
   page: number = 1,
@@ -50,31 +45,21 @@ export async function fetchNotes(
   perPage: number = 12
 ): Promise<FetchNotesResponse> {
   const cookieStore = await cookies();
-  const params: Params = {
-    page,
-    perPage,
-    tag,
-  };
-  if (searchValue) {
-    params.search = searchValue;
-  }
+  const params: Params = { page, perPage, tag };
+  if (searchValue) params.search = searchValue;
 
-  const response = await nextServer.get<FetchNotesResponse>(`/notes`, {
+  const { data } = await nextServer.get<FetchNotesResponse>("/notes", {
     params,
-    headers: {
-      Cookie: cookieStore.toString(),
-    },
+    headers: { Cookie: cookieStore.toString() },
   });
 
-  return response.data;
+  return data;
 }
 
 export async function fetchGetNoteById(id: string): Promise<Note> {
   const cookieStore = await cookies();
-  const response = await nextServer.get<Note>(`/notes/${id}`, {
-    headers: {
-      Cookie: cookieStore.toString(),
-    },
+  const { data } = await nextServer.get<Note>(`/notes/${id}`, {
+    headers: { Cookie: cookieStore.toString() },
   });
-  return response.data;
+  return data;
 }

@@ -3,7 +3,7 @@ import { nextServer } from './api';
 import type { FetchNotesResponse, Note, Params } from '../../types/note';
 import { cookies } from 'next/headers';
 
-export async function checkSessionServer() {
+export async function checkServerSession() {
   const cookieStore = await cookies();
   const {data}= await nextServer.get('/auth/session', {
     headers: {

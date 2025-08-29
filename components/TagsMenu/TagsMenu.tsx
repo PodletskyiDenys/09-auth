@@ -8,36 +8,29 @@ import { useState } from 'react';
 const TagsMenu = () => {
   const [dropdownIsOpen, setDropdownIsOpen] = useState(false);
 
-  const handleDropdownToggle = () => {
-    setDropdownIsOpen(prev => !prev);
+  const handleDropdownClose = () => {
+    setDropdownIsOpen(!dropdownIsOpen);
   };
-
-  const handleOptionClick = () => {
-    setDropdownIsOpen(false); 
-  };
-
   return (
     <div className={css.menuContainer}>
-      <button onClick={handleDropdownToggle} className={css.menuButton}>
+      <button onClick={handleDropdownClose} className={css.menuButton}>
         {dropdownIsOpen ? 'Notes ▴' : 'Notes ▾'}
       </button>
       {dropdownIsOpen && (
-        <ul className={css.menuList}>
-          {['All', 'Work', 'Personal', 'Meeting', 'Shopping', 'Todo'].map(tag => (
-            <li key={tag} className={css.menuItem}>
-              <Link
-                href={`/notes/filter/${tag}`}
-                className={css.menuLink}
-                onClick={handleOptionClick} 
-              >
-                {tag}
-              </Link>
-            </li>
-          ))}
+        <ul onClick={handleDropdownClose} className={css.menuList}>
+          {['All', 'Work', 'Personal', 'Meeting', 'Shopping', 'Todo'].map(
+            tag => (
+              <li key={tag} className={css.menuItem}>
+                <Link href={`/notes/filter/${tag}`} className={css.menuLink}>
+                  {tag}
+                </Link>
+              </li>
+            )
+          )}
         </ul>
       )}
     </div>
   );
-};
+}
 
 export default TagsMenu;

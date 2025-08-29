@@ -5,6 +5,7 @@ export interface Note {
   tag: Tag;
   createdAt: string;
   updatedAt: string;
+  userId: string;
 }
 
 export interface NewNoteData {
@@ -14,3 +15,15 @@ export interface NewNoteData {
 }
 
 export type Tag = 'Todo' | 'Work' | 'Personal' | 'Meeting' | 'Shopping';
+
+export interface FetchNotesResponse {
+  notes: Note[];
+  totalPages: number;
+}
+
+export interface Params {
+  page: number;
+  perPage: number;
+  search?: string;
+  tag?: string;
+}

@@ -1,78 +1,69 @@
+// middleware.ts
 import { NextRequest, NextResponse } from "next/server";
+import { parse } from "cookie";
+import { refreshSessionServer } from "./lib/api/serverApi";
 
-const privateRoutes = ["/profile", "/notes"];
+const privateRoutes = ["/profile"];
 const publicRoutes = ["/sign-in", "/sign-up"];
-
-async function checkSession(accessToken: string) {
-  try {
-    const res = await fetch(`${process.env.API_URL}/auth/session`, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    if (!res.ok) return { isAuth: false };
-    return await res.json();
-  } catch {
-    return { isAuth: false };
-  }
-}
-
-async function refreshSession(refreshToken: string) {
-  try {
-    const res = await fetch(`${process.env.API_URL}/auth/session`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refreshToken }),
-    });
-    if (!res.ok) return null;
-    return await res.json();
-  } catch {
-    return null;
-  }
-}
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
   const accessToken = request.cookies.get("accessToken")?.value;
   const refreshToken = request.cookies.get("refreshToken")?.value;
 
-  const isPublicRoute = publicRoutes.some((route) =>
-    pathname.startsWith(route)
-  );
-  const isPrivateRoute = privateRoutes.some((route) =>
-    pathname.startsWith(route)
-  );
+  const isPublicRoute = publicRoutes.some((route) => pathname.startsWith(route));
+  const isPrivateRoute = privateRoutes.some((route) => pathname.startsWith(route));
 
-  let isAuthenticated = false;
+  // Якщо немає accessToken, але є refreshToken → пробуємо оновити сесію
+  if (!accessToken && refreshToken) {
+    const res = await refreshSessionServer(refreshToken);
 
-  if (accessToken) {
-    const session = await checkSession(accessToken);
-    isAuthenticated = session.isAuth;
-  }
+    if (res && res.ok) {
+      const setCookie = res.headers.get("set-cookie");
+      if (setCookie) {
+        const parsed = parse(setCookie);
 
-  if (!isAuthenticated && refreshToken) {
-    const newTokens = await refreshSession(refreshToken);
-    if (newTokens?.accessToken && newTokens?.refreshToken) {
-      const response = NextResponse.next();
-      response.cookies.set("accessToken", newTokens.accessToken);
-      response.cookies.set("refreshToken", newTokens.refreshToken);
-      return response;
+        const response = NextResponse.next();
+        if (parsed.accessToken) {
+          response.cookies.set("accessToken", parsed.accessToken, {
+            httpOnly: true,
+            path: "/",
+          });
+        }
+        if (parsed.refreshToken) {
+          response.cookies.set("refreshToken", parsed.refreshToken, {
+            httpOnly: true,
+            path: "/",
+          });
+        }
+
+        // якщо користувач на публічному маршруті → редірект на головну
+        if (isPublicRoute) {
+          return NextResponse.redirect(new URL("/", request.url));
+        }
+
+        return response;
+      }
     }
   }
 
-  if (isPrivateRoute && !isAuthenticated) {
-    const response = NextResponse.redirect(new URL("/sign-in", request.url));
-    response.cookies.delete("accessToken");
-    response.cookies.delete("refreshToken");
-    return response;
+  // Якщо немає жодного токена
+  if (!accessToken && !refreshToken) {
+    if (isPrivateRoute) {
+      return NextResponse.redirect(new URL("/sign-in", request.url));
+    }
+    return NextResponse.next(); // публічний маршрут доступний
   }
 
-  if (isPublicRoute && isAuthenticated) {
-    return NextResponse.redirect(new URL("/", request.url));
+  // Якщо accessToken існує → блокуємо доступ до публічних сторінок
+  if (accessToken && isPublicRoute) {
+    return NextResponse.redirect(new URL("/profile", request.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/profile/:path*", "/notes/:path*", "/sign-in", "/sign-up"],
+  matcher: ["/profile/:path*", "/sign-in", "/sign-up"],
 };

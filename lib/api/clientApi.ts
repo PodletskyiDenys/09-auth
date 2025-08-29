@@ -1,5 +1,6 @@
-import axios from "axios";
+// import axios from "axios";
 import { UserMe, UserRequest } from "@/types/user";
+import { nextServer } from "./api";
 import { CheckSession } from "@/types/response";
 import type {
   FetchNotesResponse,
@@ -7,11 +8,6 @@ import type {
   Note,
   Params,
 } from "@/types/note";
-
-export const nextServer = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000", // зміни на свій бекенд
-  withCredentials: true,
-});
 
 export const registration = async (user: UserRequest): Promise<UserMe> => {
   const { data } = await nextServer.post<UserMe>("/auth/register", user);

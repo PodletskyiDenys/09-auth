@@ -8,7 +8,8 @@ import Header from '@/components/Header/Header';
 import Footer from '@/components/Footer/Footer';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import css from '@/app/Home.module.css';
-import getBaseUrl from '@/lib/api';
+import getBaseUrl from '@/lib/api/api';
+import AuthProvider from '@/components/AuthProvider/AuthProvider';
 
 const roboto = Roboto({
   subsets: ['latin'], 
@@ -51,12 +52,14 @@ export default function RootLayout({
       <body className={`${roboto.variable}`}>
         <Toaster position="top-center" />
         <TanStackProvider>
+          <AuthProvider>
           <Header />
           <main className={css.main}>
             {children}
             {modal}
           </main>
-          <Footer />
+            <Footer />
+            </AuthProvider>
           <ReactQueryDevtools initialIsOpen={false} />
         </TanStackProvider>
       </body>

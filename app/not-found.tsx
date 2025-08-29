@@ -1,5 +1,5 @@
 import css from '@/app/Home.module.css';
-import getBaseUrl from '@/lib/api';
+import getBaseUrl from '@/lib/api/api';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {

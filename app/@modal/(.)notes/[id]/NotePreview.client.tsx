@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import Modal from '@/components/Modal/Modal';
 import css from '@/components/Modal/Modal.module.css';
-import { fetchGetNoteById } from '@/lib/api';
+import { fetchGetNoteById } from '@/lib/api/clientApi';
 
 
 type RouteParams = { id: string };
